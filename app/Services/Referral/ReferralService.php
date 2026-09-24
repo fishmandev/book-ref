@@ -7,6 +7,7 @@ use App\Exceptions\Referral\InvalidReferralCodeException;
 use App\Exceptions\Referral\SelfReferralException;
 use App\Models\Master;
 use App\Models\Referral;
+use App\Models\ReferralEarning;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ReferralService
@@ -47,5 +48,36 @@ class ReferralService
             ->withSum('earnings', 'amount')
             ->latest()
             ->paginate($perPage);
+    }
+
+    /**
+     * @return array{total_earned: int, pending: int, paid: int, counted_referrals: int}
+     */
+    public function earningsFor(?Master $master): array
+    {
+        //FIXME - remove it!
+        if (!$master) {
+            return [
+                'total_earned' => 0,
+                'pending' => 0,
+                'paid' => 0,
+                'counted_referrals' => 0,
+            ];
+        }
+
+        $earnings = $master->referralEarnings();
+
+        return [
+            'total_earned' => (int) (clone $earnings)->sum('amount'),
+            'pending' => (int) (clone $earnings)
+                ->where('status', ReferralEarning::STATUS_PENDING)
+                ->sum('amount'),
+            'paid' => (int) (clone $earnings)
+                ->where('status', ReferralEarning::STATUS_PAID)
+                ->sum('amount'),
+            'counted_referrals' => (int) $master->referrals()
+                ->where('status', Referral::STATUS_REWARDED)
+                ->count(),
+        ];
     }
 }

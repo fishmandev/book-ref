@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AttachReferralRequest;
 use App\Http\Resources\ReferralCollection;
+use App\Http\Resources\ReferralEarningsResource;
 use App\Services\Referral\ReferralService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,6 +28,13 @@ class ReferralController extends Controller
 
         return new ReferralCollection(
             $master ? $referralService->listFor($master, $perPage) : collect(),
+        );
+    }
+
+    public function earnings(Request $request, ReferralService $referralService): ReferralEarningsResource
+    {
+        return new ReferralEarningsResource(
+            $referralService->earningsFor($request->attributes->get('current_master')),
         );
     }
 }
