@@ -8,21 +8,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('referrals', function (Blueprint $table) {
+        Schema::create('referral_earnings', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
 
             $table->foreignId('referrer_master_id')->constrained('masters')->cascadeOnDelete();
             $table->foreignId('referred_master_id')->constrained('masters')->cascadeOnDelete();
-            $table->string('program')->default('master_invite');
+            $table->foreignId('referral_id')->constrained('referrals')->cascadeOnDelete();
+            $table->foreignId('payment_id')->constrained('payments')->cascadeOnDelete();
+            $table->unsignedInteger('payment_amount');
+            $table->unsignedInteger('amount');
+            $table->unsignedInteger('percent');
             $table->string('status')->default('pending');
-
-            $table->unique('referred_master_id');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('referrals');
+        Schema::dropIfExists('referral_earnings');
     }
 };
