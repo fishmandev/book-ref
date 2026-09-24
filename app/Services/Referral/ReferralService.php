@@ -7,6 +7,7 @@ use App\Exceptions\Referral\InvalidReferralCodeException;
 use App\Exceptions\Referral\SelfReferralException;
 use App\Models\Master;
 use App\Models\Referral;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ReferralService
 {
@@ -37,5 +38,14 @@ class ReferralService
         $percent = (int) config('referral.percent');
 
         return (int) round($paymentAmount * $percent);
+    }
+
+    public function listFor(Master $master, int $perPage = 15): LengthAwarePaginator
+    {
+        return $master->referrals()
+            ->with('referredMaster:id,name')
+            ->withSum('earnings', 'amount')
+            ->latest()
+            ->paginate($perPage);
     }
 }
