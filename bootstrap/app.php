@@ -1,9 +1,12 @@
 <?php
 
+use App\Exceptions\Referral\ReferralException;
 use App\Http\Middleware\ResolveCurrentMaster;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,12 +14,21 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Авторизация в тестовом проекте заглушена:
-        // текущий мастер берётся из заголовка X-Master-Id.
+        // Authentication is stubbed in this test project.
+        // The current master is taken from the X-Master-Id header.
         $middleware->api(prepend: [
             ResolveCurrentMaster::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->dontReport(ReferralException::class);
+
+        $exceptions->render(function (ReferralException $exception, Request $request) {
+            Log::warning('Referral attachment failed', [
+                'exception' => $exception::class,
+                ...$exception->context,
+            ]);
+
+            return response()->json(['details' => $exception->details], 422);
+        });
     })->create();

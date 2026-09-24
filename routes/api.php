@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ReferralController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -7,17 +8,18 @@ use Illuminate\Support\Facades\Route;
 | API
 |--------------------------------------------------------------------------
 |
-| Текущий мастер приходит в заголовке X-Master-Id и уже разложен
-| в атрибуты запроса middleware'ом ResolveCurrentMaster:
+| The current master is passed in the X-Master-Id header and added to the
+| request attributes by the ResolveCurrentMaster middleware:
 |
 |     $master = $request->attributes->get('current_master');
 |
-| Здесь нужно написать три роута — см. README.md.
+| The three referral routes are defined in this file.
 |
 */
 
 Route::get('/ping', fn () => ['ok' => true]);
 
-// TODO: POST /api/referrals/attach
-// TODO: GET  /api/referrals/my
-// TODO: GET  /api/referrals/earnings
+Route::post('/referrals/attach', [ReferralController::class, 'attach']);
+
+// TODO: GET /api/referrals/my
+// TODO: GET /api/referrals/earnings

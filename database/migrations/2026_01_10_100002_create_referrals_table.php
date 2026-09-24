@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('referred_master_id')->constrained('masters')->cascadeOnDelete();
             $table->string('program')->default('master_invite');
             $table->string('status')->default('pending');
+
+            $table->unique('referred_master_id');
         });
     }
 
